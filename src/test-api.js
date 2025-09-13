@@ -38,38 +38,38 @@ async function runTests() {
   await makeRequest('/health');
 
   // 2. Obtener carritos como admin
-  await makeRequest('/api/carts', {
-    headers: { 'Authorization': `Bearer ${adminToken}` }
+  await makeRequest('/carts', {
+    headers: { 'Authorization': adminToken }
   });
 
   // 3. Obtener carritos con paginación
-  await makeRequest('/api/carts?_page=1&_per_page=5', {
-    headers: { 'Authorization': `Bearer ${adminToken}` }
+  await makeRequest('/carts?_page=1&_per_page=5', {
+    headers: { 'Authorization': adminToken }
   });
 
   // 4. Obtener carrito específico
-  await makeRequest('/api/carts/01989493-0def-7f41-ab40-20b04679f745', {
-    headers: { 'Authorization': `Bearer ${adminToken}` }
+  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745', {
+    headers: { 'Authorization': adminToken }
   });
 
   // 5. Obtener carrito por usuario (se crea automáticamente si no existe)
-  await makeRequest('/api/carts/user/UxIdPpt', {
-    headers: { 'Authorization': `Bearer ${userToken}` }
+  await makeRequest('/carts/user/UxIdPpt', {
+    headers: { 'Authorization': userToken }
   });
 
   // 6. Crear nuevo carrito
-  await makeRequest('/api/carts', {
+  await makeRequest('/carts', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${adminToken}` },
+    headers: { 'Authorization': adminToken },
     body: JSON.stringify({
       user_id: 'nuevo-usuario-test'
     })
   });
 
   // 7. Agregar producto al carrito
-  await makeRequest('/api/carts/01989493-0def-7f41-ab40-20b04679f745/products', {
+  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745/products', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${adminToken}` },
+    headers: { 'Authorization': adminToken },
     body: JSON.stringify({
       id: 'AA-AA-AA-A1',
       quantity: 1
@@ -77,20 +77,20 @@ async function runTests() {
   });
 
   // 8. Actualizar cantidad de producto
-  await makeRequest('/api/carts/01989493-0def-7f41-ab40-20b04679f745/products/AA-AA-AA-A1', {
+  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745/products/AA-AA-AA-A1', {
     method: 'PUT',
-    headers: { 'Authorization': `Bearer ${adminToken}` },
+    headers: { 'Authorization': adminToken },
     body: JSON.stringify({
       quantity: 3
     })
   });
 
   // 9. Intentar acceso sin token (debe fallar)
-  await makeRequest('/api/carts');
+  await makeRequest('/carts');
 
   // 10. Intentar acceso con token inválido (debe fallar)
-  await makeRequest('/api/carts', {
-    headers: { 'Authorization': 'Bearer token-invalido' }
+  await makeRequest('/carts', {
+    headers: { 'Authorization': 'token-invalido' }
   });
 
   console.log('\n Pruebas completadas');

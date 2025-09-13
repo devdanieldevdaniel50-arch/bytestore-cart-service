@@ -31,7 +31,7 @@
 
 ## Cómo usar la API
 
-Todas las rutas requieren un JWT válido. Puedes enviarlo en el header `Authorization: Bearer <token>`, en el header `x-auth-token`, como query param `?token=...` o en el body.
+Todas las rutas requieren un JWT válido. Ahora solo se usa el header `Authorization: <token>`, sin el prefijo `Bearer`. Otros métodos de autenticación han sido omitidos para simplificar el uso.
 
 ### Endpoints principales
 
