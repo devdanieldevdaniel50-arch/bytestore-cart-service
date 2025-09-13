@@ -1,8 +1,6 @@
 
 # Servicio de Carritos - ByteStore
 
-Bienvenido al microservicio de carritos de ByteStore. Aquí puedes gestionar el carrito de compras de cada usuario de forma sencilla y segura.
-
 ## ¿Qué hace este servicio?
 
 - Permite que cada usuario tenga **solo un carrito**. Si no existe, se crea automáticamente al consultar o agregar productos.
