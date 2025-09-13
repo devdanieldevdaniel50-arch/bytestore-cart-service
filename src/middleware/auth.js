@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyAdmin = (req, res, next) => {
-  if (req.user.role !== 1) {
+  if (req.user.role !== 'admin') {
     return res.status(403).json({ 
       error: 'Acceso denegado',
       message: 'Se requieren permisos de administrador' 
