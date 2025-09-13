@@ -4,8 +4,9 @@
 const baseURL = 'http://localhost:8000';
 
 // Tokens de ejemplo (estos serían generados por tu sistema de autenticación)
-const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoidGVzdEB0ZXN0LnRlc3QiLCJyb2xlIjoxLCJpYXQiOjE3NTc3Mzk5MDMsImV4cCI6MTc1NzgyNjMwM30.EMolJen_YlMzxDlazlwO_8tFRqBnHMP9z-Wn-yMfjrg';
-const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlV4SWRQcHQiLCJlbWFpbCI6ImNvcnJlb0BlbGVjdHJvbmljby5jb20iLCJyb2xlIjowLCJpYXQiOjE3NTc3Mzk5MDMsImV4cCI6MTc1NzgyNjMwM30.t66QTu1uWWcug3ia_lpKjMa0G9Ne_Jev6OUdLeb6VJc';
+// Tokens de ejemplo válidos (NO usar en producción)
+const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AZW1haWwuY29tIiwicm9sZSI6IkFETUlOSVNUUkFET1IiLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.2QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw';
+const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItNDU2IiwiZW1haWwiOiJ1c2VyQGVtYWlsLmNvbSIsInJvbGUiOiJVU0VSSU8iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.3QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw';
 
 const fetch = require('node-fetch');
 
@@ -41,68 +42,63 @@ async function makeRequest(endpoint, options = {}) {
 }
 
 async function runTests() {
-  console.log(' Iniciando pruebas del API de carritos');
+  console.log(' Iniciando pruebas del API de carritos (CRUD principal)');
 
-  // 1. Verificar salud del servicio
-  await makeRequest('/health');
-
-  // 2. Obtener carritos como admin
-  await makeRequest('/carts', {
+  // 1. Obtener carritos paginados (GET /)
+  await makeRequest('/', {
     headers: { 'Authorization': adminToken }
   });
 
-  // 3. Obtener carritos con paginación
-  await makeRequest('/carts?_page=1&_per_page=5', {
-    headers: { 'Authorization': adminToken }
-  });
-
-  // 4. Obtener carrito específico
-  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745', {
-    headers: { 'Authorization': adminToken }
-  });
-
-  // 5. Obtener carrito por usuario (se crea automáticamente si no existe)
-  await makeRequest('/carts/user/UxIdPpt', {
-    headers: { 'Authorization': userToken }
-  });
-
-  // 6. Crear nuevo carrito
-  await makeRequest('/carts', {
+  // 2. Crear nuevo carrito (POST /)
+  await makeRequest('/', {
     method: 'POST',
     headers: { 'Authorization': adminToken },
     body: JSON.stringify({
-      user_id: 'nuevo-usuario-test'
+      user_id: 'test-user-1',
+      products: [
+        { id: 1, quantity: 2 },
+        { id: 2, quantity: 1 }
+      ]
     })
   });
 
-  // 7. Agregar producto al carrito
-  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745/products', {
-    method: 'POST',
-    headers: { 'Authorization': adminToken },
-    body: JSON.stringify({
-      id: 'AA-AA-AA-A1',
-      quantity: 1
-    })
-  });
-
-  // 8. Actualizar cantidad de producto
-  await makeRequest('/carts/01989493-0def-7f41-ab40-20b04679f745/products/AA-AA-AA-A1', {
+  // 3. Actualizar productos del carrito (PUT /:id)
+  await makeRequest('/test-user-1', {
     method: 'PUT',
     headers: { 'Authorization': adminToken },
     body: JSON.stringify({
-      quantity: 3
+      products: [
+        { id: 1, quantity: 5 },
+        { id: 3, quantity: 1 }
+      ]
     })
   });
 
-  // 9. Intentar acceso sin token (debe fallar)
-  await makeRequest('/carts');
+  // 4. Eliminar carrito (DELETE /:id)
+  await makeRequest('/test-user-1', {
+    method: 'DELETE',
+    headers: { 'Authorization': adminToken }
+  });
 
-  // 10. Intentar acceso con token inválido (debe fallar)
-  await makeRequest('/carts', {
+  // 5. Intentar crear carrito con datos inválidos
+  await makeRequest('/', {
+    method: 'POST',
+    headers: { 'Authorization': adminToken },
+    body: JSON.stringify({
+      user_id: '',
+      products: 'no-es-array'
+    })
+  });
+
+  // 6. Intentar acceso sin token (debe fallar)
+  await makeRequest('/');
+
+  // 7. Intentar acceso con token inválido (debe fallar)
+  await makeRequest('/', {
     headers: { 'Authorization': 'token-invalido' }
   });
 
-  console.log('\n Pruebas completadas');
+  console.log('\n Pruebas CRUD completadas');
 }
 
 // Solo ejecutar si este archivo se ejecuta directamente

@@ -20,15 +20,18 @@ class DataService {
   // Paginación simple (usada en el controlador)
   paginate(items, page = 1, perPage = 10) {
     const total = items.length;
-    const totalPages = Math.ceil(total / perPage);
-    const start = (page - 1) * perPage;
-    const end = start + perPage;
+    const pages = Math.ceil(total / perPage);
+    const first = 1;
+    const next = page < pages ? page + 1 : null;
+    const prev = page > 1 ? page - 1 : null;
+    const data = items.slice((page - 1) * perPage, page * perPage);
     return {
-      page,
-      perPage,
       total,
-      totalPages,
-      items: items.slice(start, end)
+      pages,
+      first,
+      next,
+      prev,
+      data
     };
   }
   constructor() {

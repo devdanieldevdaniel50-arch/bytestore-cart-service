@@ -1,5 +1,6 @@
 
 const dataService = require('../services/dataService');
+const { createCartSchema, updateCartSchema } = require('../validation/cartSchemas');
 
 class CartController {
   // Obtener todos los carritos (admin ve todos, usuario solo el suyo)
@@ -9,7 +10,7 @@ class CartController {
       const page = parseInt(_page) || 1;
       const perPage = parseInt(_per_page) || 10;
       let filters = {};
-      if (req.user.role !== 'admin') {
+  if (req.user.role !== 'ADMINISTRADOR') {
         filters.user_id = req.user.id;
       } else if (user_id) {
         filters.user_id = user_id;
@@ -29,7 +30,7 @@ class CartController {
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
       // Solo el dueño o admin puede ver el carrito
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para ver este carrito' });
       }
       res.json(cart);
@@ -38,31 +39,37 @@ class CartController {
     }
   }
 
-  // Crear un carrito para el usuario autenticado (si no existe)
+  // Crear un carrito para el usuario (user_id y products[] en body)
   async createCart(req, res) {
     try {
-      // Solo puede crear su propio carrito
-      const userId = req.user.id;
-      let cart = await dataService.getCartByUserId(userId);
-      if (cart) return res.status(409).json({ error: 'Ya tienes un carrito' });
-      cart = await dataService.createCart({ user_id: userId, products: [] });
+      const parse = createCartSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+      }
+      const { user_id, products = [] } = parse.data;
+      let cart = await dataService.getCartByUserId(user_id);
+      if (cart) return res.status(409).json({ error: 'Ya existe un carrito para este usuario' });
+      cart = await dataService.createCart({ user_id, products });
       res.status(201).json(cart);
     } catch (error) {
       res.status(500).json({ error: 'Error interno del servidor', message: error.message });
     }
   }
 
-  // Actualizar un carrito (solo el dueño o admin)
+  // Actualizar todos los productos del carrito (PUT /:id)
   async updateCart(req, res) {
     try {
+      const parse = updateCartSchema.safeParse(req.body);
+      if (!parse.success) {
+        return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+      }
       const { id } = req.params;
+      const { products } = parse.data;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
-      // Solo se permite actualizar productos
-      const { products } = req.body;
       const updated = await dataService.updateCart(id, { products });
       res.json(updated);
     } catch (error) {
@@ -70,17 +77,14 @@ class CartController {
     }
   }
 
-  // Eliminar un carrito (solo si está vacío)
+  // Eliminar un carrito por user_id (DELETE /:id)
   async deleteCart(req, res) {
     try {
       const { id } = req.params;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para eliminar este carrito' });
-      }
-      if (cart.products && cart.products.length > 0) {
-        return res.status(400).json({ error: 'Solo puedes eliminar un carrito vacío' });
       }
       await dataService.deleteCart(id);
       res.status(204).send();
@@ -96,7 +100,7 @@ class CartController {
       const { id: productId, ...productData } = req.body;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
       // Si el producto ya existe, no lo duplica, solo suma cantidad
@@ -125,7 +129,7 @@ class CartController {
       const { quantity } = req.body;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
       const newProducts = cart.products.map(p =>
@@ -144,7 +148,7 @@ class CartController {
       const { id, productId } = req.params;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
       const newProducts = cart.products.filter(p => p.id !== productId);
@@ -161,7 +165,7 @@ class CartController {
       const { id } = req.params;
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-      if (req.user.role !== 'admin' && cart.user_id !== req.user.id) {
+  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
       const updated = await dataService.updateCart(id, { products: [] });
