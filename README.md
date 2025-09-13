@@ -1,4 +1,3 @@
-
 # Servicio de Carritos - ByteStore
 
 ## ¿Qué hace este servicio?
@@ -74,17 +73,51 @@ Todas las rutas requieren un JWT válido. Puedes enviarlo en el header `Authoriz
 
 - Solo un carrito por usuario. Si no existe, se crea automáticamente.
 - Los productos se almacenan dinámicamente:
-  - Si un producto no existe, se registra.
-  - Si otro usuario tiene el mismo producto, no se vuelve a registrar.
+- Si un producto no existe, se registra.
+- Si otro usuario tiene el mismo producto, no se vuelve a registrar.
 - Todas las peticiones deben validar el JWT (el id del body debe coincidir con el del token).
-- Un carrito vacío puede eliminarse directamente por el usuario o al cerrar sesión (esto lo gestiona el cliente).
 
 ## Consejos y notas
 
 - Usa siempre el JWT para todas las operaciones. El secreto es: `@y*&0a%K%7P0t@uQ^38HN$y4Z^PK#0zE7dem700Bbf&pC6HF$aU^ARkE@u$nn` y la duración es de 30 días.
 - No necesitas aplicar todos los principios REST, solo asegúrate de que las operaciones CRUD funcionen correctamente y uses los códigos HTTP básicos.
 - El servicio está listo para montarse en Docker y es compatible con el cliente ByteStore.
-- Si tienes dudas, revisa los comentarios en el código: todo está documentado para que puedas entender y modificar el servicio fácilmente.
+
+## Pruebas automáticas y generación de tokens
+
+Para ejecutar las pruebas del API y generar tokens válidos, sigue estos pasos:
+
+1. **Genera los tokens:**
+   
+   Ejecuta el generador de tokens con:
+   ```bash
+   node generate-tokens.js
+   ```
+   Esto imprimirá en consola dos tokens: uno de admin y uno de usuario.
+
+2. **Copia los tokens generados:**
+   
+   Copia los valores de los tokens que aparecen en la consola.
+
+3. **Actualiza los tokens en el archivo de pruebas:**
+   
+   Abre `src/test-api.js` y reemplaza las líneas donde se definen `adminToken` y `userToken` por los nuevos tokens generados. Ejemplo:
+   ```js
+   const adminToken = 'Bearer TU_NUEVO_TOKEN_ADMIN';
+   const userToken = 'Bearer TU_NUEVO_TOKEN_USER';
+   ```
+
+4. **Ejecuta las pruebas:**
+   
+   Ejecuta:
+   ```bash
+   node src/test-api.js
+   ```
+   Verás en consola los resultados de las pruebas del API.
+
+> Si ves errores de token inválido, asegúrate de haber copiado los tokens correctamente y que no estén expirados.
+
+¡Listo! Así puedes probar el API de carritos de manera sencilla y rápida.
 
 ---
 

@@ -25,10 +25,14 @@
           "brand": "HP",
           "model": "15-fd1255la",
           "quantity": 2
+        },
+        {
+          "quantity": 5
         }
       ],
       "created_at": "2025-08-15T05:39:55.696Z",
-      "updated_at": "2025-08-15T05:39:55.696Z"
+      "updated_at": "2025-08-15T05:39:55.696Z",
+      "updatedAt": "2025-09-13T05:14:56.890Z"
     }
   ]
 }

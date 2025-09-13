@@ -4,15 +4,20 @@
 const baseURL = 'http://localhost:8000';
 
 // Tokens de ejemplo (estos serían generados por tu sistema de autenticación)
-const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoidGVzdEB0ZXN0LnRlc3QiLCJyb2xlIjoxLCJpYXQiOjE3MzE4NzY4MDAsImV4cCI6MjE2MTg3NjgwMH0.example';
-const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlV4SWRQcHQiLCJlbWFpbCI6ImNvcnJlb0BlbGVjdHJvbmljby5jb20iLCJyb2xlIjowLCJpYXQiOjE3MzE4NzY4MDAsImV4cCI6MjE2MTg3NjgwMH0.example';
+const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoidGVzdEB0ZXN0LnRlc3QiLCJyb2xlIjoxLCJpYXQiOjE3NTc3Mzk5MDMsImV4cCI6MTc1NzgyNjMwM30.EMolJen_YlMzxDlazlwO_8tFRqBnHMP9z-Wn-yMfjrg';
+const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlV4SWRQcHQiLCJlbWFpbCI6ImNvcnJlb0BlbGVjdHJvbmljby5jb20iLCJyb2xlIjowLCJpYXQiOjE3NTc3Mzk5MDMsImV4cCI6MTc1NzgyNjMwM30.t66QTu1uWWcug3ia_lpKjMa0G9Ne_Jev6OUdLeb6VJc';
+
+const fetch = require('node-fetch');
 
 async function makeRequest(endpoint, options = {}) {
   const url = `${baseURL}${endpoint}`;
+  const isCartEndpoint = endpoint.startsWith('/carts');
+  const token = options.token || adminToken;
   const config = {
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers
+      ...options.headers,
+      ...(isCartEndpoint ? { 'Authorization': token } : {})
     },
     ...options
   };
@@ -20,8 +25,12 @@ async function makeRequest(endpoint, options = {}) {
   try {
     console.log(`\n ${config.method || 'GET'} ${endpoint}`);
     const response = await fetch(url, config);
-    const data = await response.json();
-    
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      data = await response.text();
+    }
     console.log(`Status: ${response.status}`);
     console.log('Response:', JSON.stringify(data, null, 2));
     return { status: response.status, data };

@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-app.use('/api/carts', cartRoutes);
+app.use('/carts', cartRoutes);
 
 // Ruta de salud
 app.get('/health', (req, res) => {
@@ -118,7 +118,7 @@ app.get('/', (req, res) => {
     });
 
     // Inicia el servidor
-    const PORT = config.port || 3000;
+    const PORT = config.port || 8000;
     app.listen(PORT, () => {
       console.log(`Servidor escuchando en el puerto ${PORT}`);
     });
