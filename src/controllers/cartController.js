@@ -46,11 +46,15 @@ class CartController {
       if (!parse.success) {
         return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
       }
-      const { user_id, products = [] } = parse.data;
-      let cart = await dataService.getCartByUserId(user_id);
-      if (cart) return res.status(409).json({ error: 'Ya existe un carrito para este usuario' });
-      cart = await dataService.createCart({ user_id, products });
-      res.status(201).json(cart);
+  const { user_id, products = [] } = parse.data;
+  let cart = await dataService.getCartByUserId(user_id);
+  if (cart) return res.status(409).json({ error: 'Ya existe un carrito para este usuario' });
+  // Si los productos traen más campos, guárdalos todos
+  const productsFull = products.map(p => ({ ...p }));
+  // Generar un id único para el carrito
+  const id = require('crypto').randomUUID ? require('crypto').randomUUID() : Math.random().toString(36).slice(2);
+  cart = await dataService.createCart({ id, user_id, products: productsFull, createdAt: new Date().toISOString() });
+  res.status(201).json(cart);
     } catch (error) {
       res.status(500).json({ error: 'Error interno del servidor', message: error.message });
     }

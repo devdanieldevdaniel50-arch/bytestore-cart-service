@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-app.use('/carts', cartRoutes);
+app.use('/', cartRoutes);
 
 // Ruta de salud
 app.get('/health', (req, res) => {
