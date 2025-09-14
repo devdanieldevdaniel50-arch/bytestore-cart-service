@@ -11,6 +11,7 @@ router.use(verifyToken);
 
 // CRUD principal de carritos
 router.get('/', cartController.getAllCarts.bind(cartController)); // paginado y por user_id
+router.get('/:id', cartController.getCartById.bind(cartController)); // obtener carrito por id
 router.post('/', cartController.createCart.bind(cartController)); // crear
 router.put('/:id', cartController.updateCart.bind(cartController)); // actualizar productos
 router.delete('/:id', cartController.deleteCart.bind(cartController)); // eliminar carrito
