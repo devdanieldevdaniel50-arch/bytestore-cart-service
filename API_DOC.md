@@ -102,24 +102,52 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
   - 400: datos inválidos (ver detalles en `details`)
   - 409: ya existe un carrito para ese usuario
 
+
 ### 3. Actualizar productos del carrito
 - **PUT /:id**
 - **Body:**
+
+Puedes enviar los productos como array (varios o uno solo):
 ```json
 {
   "products": [
-    { "id": 1, "quantity": 3 },
-    { "id": 2, "quantity": 1 }
+    {
+      "id": 1,
+      "name": "HP Intel Core I3 - 8GB",
+      "price": 3299000,
+      "discount": 54,
+      "stock": 20,
+      "image": "http://localhost:3000/products/images/198122843657-001-750Wx750H.webp",
+      "model": "15-fd0026la",
+      "brand": "HP",
+      "quantity": 1
+    }
   ]
 }
 ```
-- **Validación importante:**  
-  No se permiten productos con el mismo `id` en el array. Si envías productos duplicados, recibirás un error 400:
-  ```json
-  {
-    "error": "No se permiten productos duplicados en el carrito (id repetido)"
+O como objeto (un solo producto):
+```json
+{
+  "products": {
+    "id": 1,
+    "name": "HP Intel Core I3 - 8GB",
+    "price": 3299000,
+    "discount": 54,
+    "stock": 20,
+    "image": "http://localhost:3000/products/images/198122843657-001-750Wx750H.webp",
+    "model": "15-fd0026la",
+    "brand": "HP",
+    "quantity": 1
   }
-  ```
+}
+```
+
+Ambos formatos son válidos. No se permiten productos con el mismo `id` en el array. Si envías productos duplicados, recibirás un error 400:
+```json
+{
+  "error": "No se permiten productos duplicados en el carrito (id repetido)"
+}
+```
 - **Respuesta exitosa:** carrito actualizado
 - **Errores:**
   - 400: datos inválidos o productos duplicados
@@ -141,9 +169,10 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
    - `npm install`
    - `npm run dev`
 
-2. **Prueba con Postman, Thunder Client o curl:**
-   - Agrega el header `Authorization: Bearer <token>`
-   - Usa los endpoints y estructuras de body indicadas arriba.
+-2. **Prueba con Postman, Thunder Client o curl:**
+  - Agrega el header `Authorization: Bearer <token>`
+  - Usa los endpoints y estructuras de body indicadas arriba.
+  - El endpoint para obtener carrito por usuario es `GET /?user_id=...` (sin /cart)
 
 3. **Ejemplo curl:**
 ```

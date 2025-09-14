@@ -81,17 +81,47 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
    }
    ```
 - **PUT /:id** : Actualizar productos
+   Puedes enviar los productos como array (varios o uno solo):
    ```json
    {
-      "products": [ { "id": 1, "quantity": 3 } ]
+      "products": [
+        {
+          "id": 1,
+          "name": "HP Intel Core I3 - 8GB",
+          "price": 3299000,
+          "discount": 54,
+          "stock": 20,
+          "image": "http://localhost:3000/products/images/198122843657-001-750Wx750H.webp",
+          "model": "15-fd0026la",
+          "brand": "HP",
+          "quantity": 1
+        }
+      ]
    }
    ```
+   O como objeto (un solo producto):
+   ```json
+   {
+      "products": {
+        "id": 1,
+        "name": "HP Intel Core I3 - 8GB",
+        "price": 3299000,
+        "discount": 54,
+        "stock": 20,
+        "image": "http://localhost:3000/products/images/198122843657-001-750Wx750H.webp",
+        "model": "15-fd0026la",
+        "brand": "HP",
+        "quantity": 1
+      }
+   }
+   ```
+   Ambos formatos son válidos.
 - **DELETE /:id** : Eliminar carrito
-- **GET /cart?user_id=...** : Obtener carrito por user_id (nuevo formato)
+- **GET /?user_id=...** : Obtener carrito por user_id
 
 Ejemplo:
 ```http
-GET /cart?user_id=01a2b3c4-...
+GET /?user_id=01a2b3c4-...
 Authorization: Bearer <token>
 ```
 

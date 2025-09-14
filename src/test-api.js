@@ -45,9 +45,8 @@ async function makeRequest(endpoint, options = {}) {
 }
 
 async function runTests() {
-  // 3. Actualizar cantidad de un producto con PUT y verificar que no se corrompen los datos
-  // Cambiar las cantidades a valores diferentes a los actuales (por ejemplo, 3 y 4)
-  const putRes = await makeRequest(`/01989493-0def-7f41-ab40-20b04679f745`, {
+  // 3. Actualizar cantidad de productos con PUT usando array
+  const putResArray = await makeRequest(`/01989493-0def-7f41-ab40-20b04679f745`, {
     method: 'PUT',
     headers: { 'Authorization': adminToken },
     body: JSON.stringify({
@@ -57,8 +56,21 @@ async function runTests() {
       ]
     })
   });
-  console.log('Verificando datos completos tras PUT...');
-  await makeRequest(`/cart?user_id=01989493-0def-7f41-ab40-20b04679fbb4`, {
+  console.log('Verificando datos completos tras PUT (array)...');
+  await makeRequest(`/?user_id=01989493-0def-7f41-ab40-20b04679fbb4`, {
+    headers: { 'Authorization': adminToken }
+  });
+
+  // 3b. Actualizar cantidad de un solo producto con PUT usando objeto
+  const putResObj = await makeRequest(`/01989493-0def-7f41-ab40-20b04679f745`, {
+    method: 'PUT',
+    headers: { 'Authorization': adminToken },
+    body: JSON.stringify({
+      products: { id: "1", quantity: 7 }
+    })
+  });
+  console.log('Verificando datos completos tras PUT (objeto)...');
+  await makeRequest(`/?user_id=01989493-0def-7f41-ab40-20b04679fbb4`, {
     headers: { 'Authorization': adminToken }
   });
   console.log(' Iniciando pruebas del API de carritos (CRUD principal)');
@@ -101,7 +113,7 @@ async function runTests() {
 
 
   // 2. Obtener carrito por user_id usando query param (GET /cart?user_id=...)
-  await makeRequest(`/cart?user_id=${userId}`, {
+  await makeRequest(`/?user_id=${userId}`, {
     headers: { 'Authorization': adminToken }
   });
 

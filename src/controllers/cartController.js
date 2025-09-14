@@ -23,15 +23,20 @@ class CartController {
   async getAllCarts(req, res) {
     try {
       const { _page, _per_page, user_id } = req.query;
-      const page = parseInt(_page) || 1;
-      const perPage = parseInt(_per_page) || 10;
       let filters = {};
-  if (req.user.role !== 'ADMINISTRADOR') {
+      if (req.user.role !== 'ADMINISTRADOR') {
         filters.user_id = req.user.id;
       } else if (user_id) {
         filters.user_id = user_id;
       }
       const carts = await dataService.getCarts(filters);
+      // Si se busca por user_id, devolver solo el array de carritos (sin paginación ni metadatos)
+      if (user_id) {
+        return res.json(carts);
+      }
+      // Si no, devolver paginado como antes
+      const page = parseInt(_page) || 1;
+      const perPage = parseInt(_per_page) || 10;
       const result = dataService.paginate(carts, page, perPage);
       return res.json(result);
     } catch (error) {
@@ -63,15 +68,16 @@ class CartController {
         // Devuelve detalles del error para depurar
         return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
       }
-  const { user_id, products = [] } = parse.data;
-  let cart = await dataService.getCartByUserId(user_id);
-  if (cart) return res.status(409).json({ error: 'Ya existe un carrito para este usuario' });
-  // Si los productos traen más campos, guárdalos todos
-  const productsFull = products.map(p => ({ ...p }));
-  // Generar un id único para el carrito
-  const id = require('crypto').randomUUID ? require('crypto').randomUUID() : Math.random().toString(36).slice(2);
-  cart = await dataService.createCart({ id, user_id, products: productsFull, createdAt: new Date().toISOString() });
-  res.status(201).json(cart);
+      const { user_id, products = [] } = parse.data;
+      let cart = await dataService.getCartByUserId(user_id);
+      if (cart) return res.status(409).json({ error: 'Ya existe un carrito para este usuario' });
+      // Si los productos traen más campos, guárdalos todos
+      const productsFull = products.map(p => ({ ...p }));
+      // Generar un id único para el carrito usando uuid v7
+      const { v7: uuidv7 } = require('uuid');
+      const id = uuidv7();
+      cart = await dataService.createCart({ id, user_id, products: productsFull, createdAt: new Date().toISOString() });
+      res.status(201).json(cart);
     } catch (error) {
       res.status(500).json({ error: 'Error interno del servidor', message: error.message });
     }
@@ -80,7 +86,12 @@ class CartController {
   // Actualizar todos los productos del carrito (PUT /:id)
   async updateCart(req, res) {
     try {
-      const parse = updateCartSchema.safeParse(req.body);
+      let body = req.body;
+      // Si products viene como objeto, conviértelo en array
+      if (body && body.products && !Array.isArray(body.products)) {
+        body.products = [body.products];
+      }
+      const parse = updateCartSchema.safeParse(body);
       if (!parse.success) {
         return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
       }
