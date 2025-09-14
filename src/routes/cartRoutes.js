@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const cartController = require('../controllers/cartController');
 const { verifyToken, verifyAdmin } = require('../middleware/auth');
+const dataService = require('../services/dataService'); // <-- Importar dataService
 
 // Aplicar autenticación a todas las rutas
 router.use(verifyToken);
@@ -14,23 +15,20 @@ router.post('/', cartController.createCart.bind(cartController)); // crear
 router.put('/:id', cartController.updateCart.bind(cartController)); // actualizar productos
 router.delete('/:id', cartController.deleteCart.bind(cartController)); // eliminar carrito
 
-// Ruta para obtener carrito por user_id y id
-router.get('/:user_id/:id', async (req, res) => {
+// Obtener carrito por id
+router.get('/id/:id', cartController.getCartById.bind(cartController));
+
+// Obtener carrito por user_id
+router.get('/user/:user_id', async (req, res) => {
   try {
-    const { user_id, id } = req.params;
-    // Busca el carrito por id y valida que pertenezca al user_id
-    const cart = await cartController.getCartById({
-      ...req,
-      params: { id }
-    }, {
-      ...res,
-      json: (data) => {
-        if (data && data.user_id && data.user_id != user_id) {
-          return res.status(404).json({ error: 'Carrito no encontrado para este usuario' });
-        }
-        res.json(data);
-      }
-    });
+    const { user_id } = req.params;
+    const cart = await dataService.getCartByUserId(user_id);
+    if (!cart) return res.status(404).json({ error: 'Carrito no encontrado para este usuario' });
+    // Validar permisos: solo el dueño o admin puede ver
+    if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
+      return res.status(403).json({ error: 'No tienes permiso para ver este carrito' });
+    }
+    res.json(cart);
   } catch (error) {
     res.status(500).json({ error: 'Error interno del servidor', message: error.message });
   }

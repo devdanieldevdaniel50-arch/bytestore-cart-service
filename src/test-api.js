@@ -5,20 +5,20 @@ const baseURL = 'http://localhost:8000';
 
 // Tokens de ejemplo (estos serían generados por tu sistema de autenticación)
 // Tokens de ejemplo válidos (NO usar en producción)
-const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AZW1haWwuY29tIiwicm9sZSI6IkFETUlOSVNUUkFET1IiLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.2QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw';
-const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItNDU2IiwiZW1haWwiOiJ1c2VyQGVtYWlsLmNvbSIsInJvbGUiOiJVU0VSSU8iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.3QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw6QwQnQw';
+const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoidGVzdEB0ZXN0LnRlc3QiLCJyb2xlIjoxLCJpYXQiOjE3NTc4MTczODUsImV4cCI6MTc1NzkwMzc4NX0.XQkNcEG5b9ohZ3pLsYGCEcCxUU_EPE7zpq0yiPMRjOM';
+const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlV4SWRQcHQiLCJlbWFpbCI6ImNvcnJlb0BlbGVjdHJvbmljby5jb20iLCJyb2xlIjowLCJpYXQiOjE3NTc4MTczODUsImV4cCI6MTc1NzkwMzc4NX0.qS0lEdycGzomECJLiJ2qBHEu8Oio6879S6dSX5n0UAU';
 
 const fetch = require('node-fetch');
 
 async function makeRequest(endpoint, options = {}) {
   const url = `${baseURL}${endpoint}`;
-  const isCartEndpoint = endpoint.startsWith('/carts');
+  // Eliminar referencia a /carts, ya no se usa prefijo
   const token = options.token || adminToken;
   const config = {
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
-      ...(isCartEndpoint ? { 'Authorization': token } : {})
+      ...(token ? { 'Authorization': token } : {})
     },
     ...options
   };
@@ -44,41 +44,49 @@ async function makeRequest(endpoint, options = {}) {
 async function runTests() {
   console.log(' Iniciando pruebas del API de carritos (CRUD principal)');
 
-  // 1. Obtener carritos paginados (GET /)
-  await makeRequest('/', {
-    headers: { 'Authorization': adminToken }
-  });
-
-  // 2. Crear nuevo carrito (POST /)
-  await makeRequest('/', {
+  // 1. Crear un carrito válido (POST /)
+  const userId = '01a2b3c4-0def-7141-ab40-28b4679fb0b5';
+  const createRes = await makeRequest('/', {
     method: 'POST',
     headers: { 'Authorization': adminToken },
     body: JSON.stringify({
-      user_id: 'test-user-1',
+      user_id: userId,
       products: [
-        { id: 1, quantity: 2 },
-        { id: 2, quantity: 1 }
+        {
+          id: 1,
+          name: 'HP Intel Core I3 - 8GB',
+          model: '15-600261a',
+          price: 3299000,
+          discount: 5,
+          stock: 20,
+          image: 'http://localhost:3000/products/images/imagen.webp',
+          brand: 'HP',
+          quantity: 1
+        }
       ]
     })
   });
+  const cartId = createRes.data && createRes.data.id;
 
-  // 3. Actualizar productos del carrito (PUT /:id)
-  await makeRequest('/test-user-1', {
-    method: 'PUT',
-    headers: { 'Authorization': adminToken },
-    body: JSON.stringify({
-      products: [
-        { id: 1, quantity: 5 },
-        { id: 3, quantity: 1 }
-      ]
-    })
+  // 2. Obtener carrito por id (GET /id/:id)
+  if (cartId) {
+    await makeRequest(`/id/${cartId}`, {
+      headers: { 'Authorization': adminToken }
+    });
+  }
+
+  // 3. Obtener carrito por user_id (GET /user/:user_id)
+  await makeRequest(`/user/${userId}`, {
+    headers: { 'Authorization': adminToken }
   });
 
   // 4. Eliminar carrito (DELETE /:id)
-  await makeRequest('/test-user-1', {
-    method: 'DELETE',
-    headers: { 'Authorization': adminToken }
-  });
+  if (cartId) {
+    await makeRequest(`/${cartId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': adminToken }
+    });
+  }
 
   // 5. Intentar crear carrito con datos inválidos
   await makeRequest('/', {

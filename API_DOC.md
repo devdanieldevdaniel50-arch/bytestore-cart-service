@@ -27,9 +27,19 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
   "prev": null,
   "data": [
     {
-      "user_id": "string",
+      "user_id": "01a2b3c4-...",
       "products": [
-        { "id": 1, "quantity": 2 }
+        {
+          "id": 1,
+          "name": "HP Intel Core I3 - 8GB",
+          "model": "15-600261a",
+          "price": 3299000,
+          "discount": 5,
+          "stock": 20,
+          "image": "http://...",
+          "brand": "HP",
+          "quantity": 1
+        }
       ]
     }
   ]
@@ -41,10 +51,19 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
 - **Body:**
 ```
 {
-  "user_id": "string",
+  "user_id": "01a2b3c4-...",
   "products": [
-    { "id": 1, "quantity": 2 },
-    { "id": 2, "quantity": 1 }
+    {
+      "id": 1,
+      "name": "HP Intel Core I3 - 8GB",
+      "model": "15-600261a",
+      "price": 3299000,
+      "discount": 5,
+      "stock": 20,
+      "image": "http://...",
+      "brand": "HP",
+      "quantity": 1
+    }
   ]
 }
 ```
@@ -52,6 +71,14 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
 - **Errores:**
   - 400: datos inválidos (ver detalles en `details`)
   - 409: ya existe un carrito para ese usuario
+
+### 2.1 Obtener carrito por id
+- **GET /id/:id**
+- Devuelve el carrito por id si el usuario autenticado tiene permisos.
+
+### 2.2 Obtener carrito por user_id
+- **GET /user/:user_id**
+- Devuelve el carrito por user_id si el usuario autenticado tiene permisos.
 
 ### 3. Actualizar productos del carrito
 - **PUT /:id**
@@ -94,7 +121,7 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
 curl -X POST http://localhost:5000/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
-  -d '{"user_id":"123","products":[{"id":1,"quantity":2}]}'
+  -d '{"user_id":"01a2b3c4-...","products":[{"id":1,"name":"HP Intel Core I3 - 8GB","model":"15-600261a","price":3299000,"discount":5,"stock":20,"image":"http://...","brand":"HP","quantity":1}]}'
 ```
 
 > Si tienes dudas sobre los errores de validación, revisa el campo `details` en la respuesta 400.

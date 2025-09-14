@@ -4,17 +4,17 @@ const path = require('path');
 class DataService {
   // Devuelve todos los carritos o filtra por user_id si se pasa en filters
   async getCarts(filters = {}) {
-    const carts = await this.getAllCarts();
+    const all = await this.getAllCarts();
     if (filters.user_id) {
-      return carts.filter(cart => cart.user_id === filters.user_id);
+      return all.filter(cart => cart.user_id === filters.user_id);
     }
-    return carts;
+    return all;
   }
 
   // Devuelve el carrito de un usuario por su user_id (solo uno)
   async getCartByUserId(userId) {
-    const carts = await this.getAllCarts();
-    return carts.find(cart => cart.user_id === userId);
+    const all = await this.getAllCarts();
+    return all.find(cart => cart.user_id === userId);
   }
 
   // Paginación simple (usada en el controlador)

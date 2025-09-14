@@ -9,7 +9,24 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
    - `POST /` : Crear carrito (`user_id` y `products[]` en el body)
    - `PUT /:id` : Actualizar todos los productos del carrito (body: `products[]`)
    - `DELETE /:id` : Eliminar el carrito del usuario (por `user_id`)
-- **Validaciones robustas:** Todas las entradas se validan con Zod, devolviendo errores claros y estructurados.
+   - `GET /id/:id` : Obtener un carrito por id
+   - `GET /user/:user_id` : Obtener un carrito por user_id
+
+- **Validaciones robustas:**
+- Todas las entradas se validan con Zod, devolviendo errores claros y estructurados.
+- El body de productos y user_id ahora exige:
+  - `user_id`: UUID v4/v7
+  - `products[]`: cada producto debe tener los siguientes campos y validaciones:
+    - `id` (int, >=1)
+    - `name` (string, 5-40, solo letras/números/espacios/-)
+    - `model` (string, 5-36, letras/números/-/\)
+    - `price` (número, 100000-20000000)
+    - `discount` (número, 0-90)
+    - `stock` (int, >0)
+    - `image` (url)
+    - `brand` (string, 2-10, solo letras/números/espacios/-)
+    - `quantity` (int, >=1)
+
 - **Paginación estándar:**
    ```json
    {
@@ -48,8 +65,20 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
 - **POST /** : Crear carrito
    ```json
    {
-      "user_id": "string",
-      "products": [ { "id": 1, "quantity": 2 } ]
+      "user_id": "01a2b3c4-...",
+      "products": [
+        {
+          "id": 1,
+          "name": "HP Intel Core I3 - 8GB",
+          "model": "15-600261a",
+          "price": 3299000,
+          "discount": 5,
+          "stock": 20,
+          "image": "http://...",
+          "brand": "HP",
+          "quantity": 1
+        }
+      ]
    }
    ```
 - **PUT /:id** : Actualizar productos
@@ -59,6 +88,8 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
    }
    ```
 - **DELETE /:id** : Eliminar carrito
+- **GET /id/:id** : Obtener carrito por id
+- **GET /user/:user_id** : Obtener carrito por user_id
 
 ## Validaciones y errores
 
