@@ -9,8 +9,7 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
    - `POST /` : Crear carrito (`user_id` y `products[]` en el body)
    - `PUT /:id` : Actualizar todos los productos del carrito (body: `products[]`)
    - `DELETE /:id` : Eliminar el carrito del usuario (por `user_id`)
-   - `GET /id/:id` : Obtener un carrito por id
-   - `GET /user/:user_id` : Obtener un carrito por user_id
+   - `GET /cart?user_id=...` : Obtener un carrito por user_id (nuevo formato)
 
 - **Validaciones robustas:**
 - Todas las entradas se validan con Zod, devolviendo errores claros y estructurados.
@@ -88,8 +87,36 @@ Este microservicio gestiona los carritos de compra de ByteStore, permitiendo a c
    }
    ```
 - **DELETE /:id** : Eliminar carrito
-- **GET /id/:id** : Obtener carrito por id
-- **GET /user/:user_id** : Obtener carrito por user_id
+- **GET /cart?user_id=...** : Obtener carrito por user_id (nuevo formato)
+
+Ejemplo:
+```http
+GET /cart?user_id=01a2b3c4-...
+Authorization: Bearer <token>
+```
+
+Respuesta:
+```json
+{
+   "id": "...",
+   "user_id": "01a2b3c4-...",
+   "products": [
+      {
+         "id": 1,
+         "name": "HP Intel Core I3 - 8GB",
+         "model": "15-600261a",
+         "price": 3299000,
+         "discount": 5,
+         "stock": 20,
+         "image": "http://...",
+         "brand": "HP",
+         "quantity": 1
+      }
+   ],
+   "createdAt": "2025-09-13T05:14:56.890Z",
+   "updatedAt": "2025-09-13T05:14:56.890Z"
+}
+```
 
 ## Validaciones y errores
 

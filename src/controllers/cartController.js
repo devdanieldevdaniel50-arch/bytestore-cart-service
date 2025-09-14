@@ -1,8 +1,24 @@
-
 const dataService = require('../services/dataService');
 const { createCartSchema, updateCartSchema } = require('../validation/cartSchemas');
 
 class CartController {
+  // Obtener un carrito por user_id usando query param (?user_id=...)
+  async getCartByUserQuery(req, res) {
+    try {
+      const { user_id } = req.query;
+      if (!user_id) return res.status(400).json({ error: 'Falta user_id en query' });
+      const cart = await dataService.getCartByUserId(user_id);
+      if (!cart) return res.status(404).json({ error: 'Carrito no encontrado para este usuario' });
+      // Validar permisos: solo el dueño o admin puede ver
+      if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
+        return res.status(403).json({ error: 'No tienes permiso para ver este carrito' });
+      }
+      // Devolver productos completos
+      res.json(cart);
+    } catch (error) {
+      res.status(500).json({ error: 'Error interno del servidor', message: error.message });
+    }
+  }
   // Obtener todos los carritos (admin ve todos, usuario solo el suyo)
   async getAllCarts(req, res) {
     try {

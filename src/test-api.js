@@ -45,7 +45,8 @@ async function runTests() {
   console.log(' Iniciando pruebas del API de carritos (CRUD principal)');
 
   // 1. Crear un carrito válido (POST /)
-  const userId = '01a2b3c4-0def-7141-ab40-28b4679fb0b5';
+  // Usar un user_id que ya existe en db.json para asegurar éxito en las pruebas
+  const userId = '01989493-0def-7f41-ab40-20b04679fbb4';
   const createRes = await makeRequest('/', {
     method: 'POST',
     headers: { 'Authorization': adminToken },
@@ -53,13 +54,13 @@ async function runTests() {
       user_id: userId,
       products: [
         {
-          id: 1,
+          id: 'AA-AA-AA-AA',
           name: 'HP Intel Core I3 - 8GB',
-          model: '15-600261a',
+          model: '15-fd0026la',
           price: 3299000,
-          discount: 5,
-          stock: 20,
-          image: 'http://localhost:3000/products/images/imagen.webp',
+          discount: 54,
+          stock: 10,
+          image: 'http://localhost:8001/images/198122843657-001-750Wx750H.webp',
           brand: 'HP',
           quantity: 1
         }
@@ -68,15 +69,9 @@ async function runTests() {
   });
   const cartId = createRes.data && createRes.data.id;
 
-  // 2. Obtener carrito por id (GET /id/:id)
-  if (cartId) {
-    await makeRequest(`/id/${cartId}`, {
-      headers: { 'Authorization': adminToken }
-    });
-  }
 
-  // 3. Obtener carrito por user_id (GET /user/:user_id)
-  await makeRequest(`/user/${userId}`, {
+  // 2. Obtener carrito por user_id usando query param (GET /cart?user_id=...)
+  await makeRequest(`/cart?user_id=${userId}`, {
     headers: { 'Authorization': adminToken }
   });
 

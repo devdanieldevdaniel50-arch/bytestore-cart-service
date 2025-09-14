@@ -72,13 +72,38 @@ Servidor escuchando en el puerto 8000 Documentación de la API de Carritos
   - 400: datos inválidos (ver detalles en `details`)
   - 409: ya existe un carrito para ese usuario
 
-### 2.1 Obtener carrito por id
-- **GET /id/:id**
-- Devuelve el carrito por id si el usuario autenticado tiene permisos.
-
-### 2.2 Obtener carrito por user_id
-- **GET /user/:user_id**
+### 2.1 Obtener carrito por user_id (nuevo formato)
+- **GET /cart?user_id=...**
 - Devuelve el carrito por user_id si el usuario autenticado tiene permisos.
+
+Ejemplo:
+```http
+GET /cart?user_id=01a2b3c4-...
+Authorization: Bearer <token>
+```
+
+Respuesta:
+```json
+{
+  "id": "...",
+  "user_id": "01a2b3c4-...",
+  "products": [
+    {
+      "id": 1,
+      "name": "HP Intel Core I3 - 8GB",
+      "model": "15-600261a",
+      "price": 3299000,
+      "discount": 5,
+      "stock": 20,
+      "image": "http://...",
+      "brand": "HP",
+      "quantity": 1
+    }
+  ],
+  "createdAt": "2025-09-13T05:14:56.890Z",
+  "updatedAt": "2025-09-13T05:14:56.890Z"
+}
+```
 
 ### 3. Actualizar productos del carrito
 - **PUT /:id**
