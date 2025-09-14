@@ -5,7 +5,7 @@ const baseURL = 'http://localhost:8000';
 
 // Tokens de ejemplo (estos serían generados por tu sistema de autenticación)
 // Tokens de ejemplo válidos (NO usar en producción)
-const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoidGVzdEB0ZXN0LnRlc3QiLCJyb2xlIjoxLCJpYXQiOjE3NTc4MTczODUsImV4cCI6MTc1NzkwMzc4NX0.XQkNcEG5b9ohZ3pLsYGCEcCxUU_EPE7zpq0yiPMRjOM';
+const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxOTg5NDkzLTBkZWYtN2Y0MS1hYjQwLTIwYjA0Njc5ZmJiNCIsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJyb2xlIjoiQURNSU5JU1RSQURPUiIsImlhdCI6MTc1NzgyNDQ0MywiZXhwIjoxNzYwNDE2NDQzfQ.OXGnRQJ0IpGjRmczxDV7Ht4UL3cQUgAvhAnDLOOO10E';
 const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlV4SWRQcHQiLCJlbWFpbCI6ImNvcnJlb0BlbGVjdHJvbmljby5jb20iLCJyb2xlIjowLCJpYXQiOjE3NTc4MTczODUsImV4cCI6MTc1NzkwMzc4NX0.qS0lEdycGzomECJLiJ2qBHEu8Oio6879S6dSX5n0UAU';
 
 const fetch = require('node-fetch');
@@ -34,6 +34,9 @@ async function makeRequest(endpoint, options = {}) {
     }
     console.log(`Status: ${response.status}`);
     console.log('Response:', JSON.stringify(data, null, 2));
+    if (data && data.details) {
+      console.log('Detalles de validación:', JSON.stringify(data.details, null, 2));
+    }
     return { status: response.status, data };
   } catch (error) {
     console.log(`Error: ${error.message}`);
@@ -42,10 +45,26 @@ async function makeRequest(endpoint, options = {}) {
 }
 
 async function runTests() {
+  // 3. Actualizar cantidad de un producto con PUT y verificar que no se corrompen los datos
+  // Cambiar las cantidades a valores diferentes a los actuales (por ejemplo, 3 y 4)
+  const putRes = await makeRequest(`/01989493-0def-7f41-ab40-20b04679f745`, {
+    method: 'PUT',
+    headers: { 'Authorization': adminToken },
+    body: JSON.stringify({
+      products: [
+        { id: "1", quantity: 3 },
+        { id: "2", quantity: 4 }
+      ]
+    })
+  });
+  console.log('Verificando datos completos tras PUT...');
+  await makeRequest(`/cart?user_id=01989493-0def-7f41-ab40-20b04679fbb4`, {
+    headers: { 'Authorization': adminToken }
+  });
   console.log(' Iniciando pruebas del API de carritos (CRUD principal)');
 
-  // 1. Crear un carrito válido (POST /)
-  // Usar un user_id que ya existe en db.json para asegurar éxito en las pruebas
+  // 1. Crear un carrito válido (POST /) con el JSON de prueba actualizado
+  // Usar el user_id que ya existe en db.json para asegurar éxito en las pruebas
   const userId = '01989493-0def-7f41-ab40-20b04679fbb4';
   const createRes = await makeRequest('/', {
     method: 'POST',
@@ -54,13 +73,24 @@ async function runTests() {
       user_id: userId,
       products: [
         {
-          id: 'AA-AA-AA-AA',
+          id: 1,
           name: 'HP Intel Core I3 - 8GB',
-          model: '15-fd0026la',
           price: 3299000,
           discount: 54,
-          stock: 10,
-          image: 'http://localhost:8001/images/198122843657-001-750Wx750H.webp',
+          stock: 20,
+          image: 'http://localhost:3000/products/images/198122843657-001-750Wx750H.webp',
+          model: '15-fd0026la',
+          brand: 'HP',
+          quantity: 1
+        },
+        {
+          id: 2,
+          name: 'HP Intel Core I3 - 8GB',
+          price: 3299000,
+          discount: 54,
+          stock: 20,
+          image: 'http://localhost:3000/products/images/198122843657-001-750Wx750H.webp',
+          model: '15-fd0026la',
           brand: 'HP',
           quantity: 1
         }

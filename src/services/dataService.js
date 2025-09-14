@@ -99,11 +99,29 @@ class DataService {
     
     if (cartIndex === -1) return null;
     
-    data.carts[cartIndex] = { 
-      ...data.carts[cartIndex], 
-      ...updates, 
-      updatedAt: new Date().toISOString() 
-    };
+    // Si updates.products existe, solo actualiza quantity y conserva los datos originales
+    if (updates.products) {
+      const originalProducts = data.carts[cartIndex].products || [];
+      const updatedProducts = updates.products.map(updProd => {
+        const found = originalProducts.find(p => String(p.id) === String(updProd.id));
+        if (found) {
+          return { ...found, quantity: updProd.quantity };
+        }
+        // Si no existe, agrega solo id y quantity
+        return { id: updProd.id, quantity: updProd.quantity };
+      });
+      data.carts[cartIndex] = {
+        ...data.carts[cartIndex],
+        products: updatedProducts,
+        updatedAt: new Date().toISOString()
+      };
+    } else {
+      data.carts[cartIndex] = {
+        ...data.carts[cartIndex],
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+    }
     
     await this.writeData(data);
     return data.carts[cartIndex];
