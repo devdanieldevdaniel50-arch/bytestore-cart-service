@@ -10,12 +10,9 @@ router.use(verifyToken);
 
 
 // CRUD principal de carritos
-router.get('/', cartController.getAllCarts.bind(cartController)); // paginado
+router.get('/', cartController.getAllCarts.bind(cartController)); // paginado y por user_id
 router.post('/', cartController.createCart.bind(cartController)); // crear
 router.put('/:id', cartController.updateCart.bind(cartController)); // actualizar productos
 router.delete('/:id', cartController.deleteCart.bind(cartController)); // eliminar carrito
-
-// Obtener carrito por user_id como query param (?user_id=...)
-router.get('/cart', cartController.getCartByUserQuery.bind(cartController));
 
 module.exports = router;

@@ -96,23 +96,14 @@ class DataService {
   async updateCart(id, updates) {
     const data = await this.readData();
     const cartIndex = data.carts.findIndex(cart => cart.id === id);
-    
+
     if (cartIndex === -1) return null;
-    
-    // Si updates.products existe, solo actualiza quantity y conserva los datos originales
+
+    // Si updates.products existe, reemplaza toda la lista de productos (con todos los campos)
     if (updates.products) {
-      const originalProducts = data.carts[cartIndex].products || [];
-      const updatedProducts = updates.products.map(updProd => {
-        const found = originalProducts.find(p => String(p.id) === String(updProd.id));
-        if (found) {
-          return { ...found, quantity: updProd.quantity };
-        }
-        // Si no existe, agrega solo id y quantity
-        return { id: updProd.id, quantity: updProd.quantity };
-      });
       data.carts[cartIndex] = {
         ...data.carts[cartIndex],
-        products: updatedProducts,
+        products: updates.products,
         updatedAt: new Date().toISOString()
       };
     } else {
@@ -122,7 +113,7 @@ class DataService {
         updatedAt: new Date().toISOString()
       };
     }
-    
+
     await this.writeData(data);
     return data.carts[cartIndex];
   }

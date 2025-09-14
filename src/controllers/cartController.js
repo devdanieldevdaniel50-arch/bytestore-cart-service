@@ -60,6 +60,7 @@ class CartController {
     try {
       const parse = createCartSchema.safeParse(req.body);
       if (!parse.success) {
+        // Devuelve detalles del error para depurar
         return res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
       }
   const { user_id, products = [] } = parse.data;
@@ -85,9 +86,17 @@ class CartController {
       }
       const { id } = req.params;
       const { products } = parse.data;
+
+      // Validar que no haya productos con el mismo id
+      const ids = products.map(p => p.id);
+      const idsSet = new Set(ids);
+      if (ids.length !== idsSet.size) {
+        return res.status(400).json({ error: 'No se permiten productos duplicados en el carrito (id repetido)' });
+      }
+
       const cart = await dataService.getCartById(id);
       if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
-  if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
+      if (req.user.role !== 'ADMINISTRADOR' && cart.user_id !== req.user.id) {
         return res.status(403).json({ error: 'No tienes permiso para modificar este carrito' });
       }
       const updated = await dataService.updateCart(id, { products });
